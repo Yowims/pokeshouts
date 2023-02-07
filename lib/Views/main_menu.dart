@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:pokeshouts/Views/Designs/design_helper.dart';
+import 'package:pokeshouts/Views/Helpers/design_helper.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class MainMenuPage extends StatefulWidget {
   const MainMenuPage({Key? key}) : super(key: key);
@@ -13,7 +11,7 @@ class MainMenuPage extends StatefulWidget {
 
 class _MainMenuPageState extends State<MainMenuPage> {
 
-    @override
+  @override
   Widget build(BuildContext context) {
 
     double scale = 0.4;
@@ -26,10 +24,17 @@ class _MainMenuPageState extends State<MainMenuPage> {
     };
 
     Map<int,String> texts = {
-      0: "Facile",
-      1: "Moyen",
-      2: "Difficile",
-      3: "Extrême"
+      0: AppLocalizations.of(context)!.easy_mode,
+      1: AppLocalizations.of(context)!.medium_mode,
+      2: AppLocalizations.of(context)!.hard_mode,
+      3: AppLocalizations.of(context)!.extreme_mode
+    };
+
+    Map<int,String> routes = {
+      0: "/easy",
+      1: "/medium",
+      2: "/hard",
+      3: "/extreme"
     };
 
     return Scaffold(
@@ -37,26 +42,48 @@ class _MainMenuPageState extends State<MainMenuPage> {
         flexibleSpace: SizedBox(
           height: 150,
           child: Center(
-            child: Text("PokeShouts", style: DesignHelper.titleStyle()),
+            child: DesignHelper.titleText(),
           ),
         ),
       ),
       body: Center(
         child: GridView.builder(
           shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           itemCount: 4,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2), 
           itemBuilder: (context, index) {
-            return Column(
-              children: [
-                Container(child: images[index]),
-                Text(texts[index]!, style: DesignHelper.gridTextStyle(context),)
-              ],
+            return GestureDetector(
+              onTap: (){
+                try{
+                  Navigator.pushNamed(context, routes[index]!);
+                }
+                catch(error)
+                {
+                  showDialog(
+                    context: context,
+                    builder: ((_) {
+                      return AlertDialog(
+                        content: Text(AppLocalizations.of(context)!.coming_soon),
+                      );
+                    })
+                  );
+                }
+              },
+              child: Column(
+                children: [
+                  Container(child: images[index]),
+                  Text(texts[index]!, style: DesignHelper.gridTextStyle(context),)
+                ],
+              ),
             );
           }
         ),
-      )
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: (){},
+        child: const Icon(Icons.assignment),
+      ),
     );
   }
 }
