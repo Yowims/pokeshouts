@@ -1,4 +1,0 @@
-class GoodPokemon
-{
-  //final int 
-}

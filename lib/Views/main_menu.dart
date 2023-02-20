@@ -81,7 +81,9 @@ class _MainMenuPageState extends State<MainMenuPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: (){},
+        onPressed: (){
+          Navigator.of(context).pushNamed('/test');
+        },
         child: const Icon(Icons.assignment),
       ),
     );

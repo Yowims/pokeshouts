@@ -1,9 +1,11 @@
 import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pokeshouts/Controllers/api_controller.dart';
 import 'package:pokeshouts/Controllers/gameplay_controller.dart';
 import 'package:pokeshouts/Models/file_info.dart';
+import 'package:pokeshouts/Models/pokemon.dart';
 import 'package:pokeshouts/Views/Components/waiting_indicator.dart';
 import 'package:pokeshouts/Views/Helpers/design_helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -22,61 +24,74 @@ class _EasyModePageState extends State<EasyModePage> {
 
   AudioPlayer audioPlugin = AudioPlayer();
   
-  Map<int,String> pokemonChoices = {};
-  Map<int,String> pokemonNames = {};
+  Map<int,Pokemon> pokemonChoices = {};
   String pokemonShout = "";
   int goodAnswerIndex = 0;
 
+  bool isLoading = false;
+
   Future getFileInfo() async
   {
-    FileInfo? fileInfo;
+    setState(() {
+      isLoading = true;
+    });
     // On définit les 4 cases du choix de Pokémon
     for(var i = 0; i<4; i++)
     {
-      var randomPokemon = PokedexHelper.pokedex[Random().nextInt(650)+1]!; // De 1 à 649
-      pokemonNames.addAll({i: randomPokemon});
-      await ApiController().getPokemonInfos("Fichier:$randomPokemon.png").then((value){
-        setState(() {
-          fileInfo = value;
-          pokemonChoices.addAll({i: fileInfo!.url});
-        });
+      Pokemon pkmn = Pokemon.empty();
+      var randomPokemonIndex = Random().nextInt(650)+1;
+      var randomPokemon = PokedexHelper.pokedex[randomPokemonIndex]!; // De 1 à 649
+
+      // On récupère les infos du pokémon depuis Poképédia
+      await ApiController().searchStringsInHtml("https://www.pokepedia.fr/$randomPokemon").then((value) {
+        try
+        {
+          pkmn.index = randomPokemonIndex;
+          pkmn.name = randomPokemon;
+          pkmn.imageUrl = value.firstWhere((element) => element.contains(".png"));
+          pkmn.shoutUrl = value.firstWhere((element) => element.contains(".ogg"));
+        }
+        catch(error)
+        {
+          var urlFormatted = randomPokemon.replaceAll(r" ","_");
+          ApiController().searchStringsInHtml("https://www.pokepedia.fr/$urlFormatted").then((value) {
+            pkmn.index = randomPokemonIndex;
+            pkmn.name = randomPokemon;
+            pkmn.imageUrl = value.firstWhere((element) => element.contains(".png"));
+            pkmn.shoutUrl = value.firstWhere((element) => element.contains(".ogg"));
+          });
+        }
+
+        pokemonChoices.addAll({i: pkmn});
       });
     }
 
     // Et là, parmi les 4 choix, on choisit la bonne réponse
     int goodChoice = Random().nextInt(100)+1; // De 1 à 100
-    var goodPokemon;
 
     if(1 <= goodChoice && goodChoice <= 25) // De 1 à 25 : Case 1
     {
-      goodPokemon = pokemonNames[0];
       goodAnswerIndex = 0;
+      pokemonShout = pokemonChoices[0]!.shoutUrl;
     }
     else if(26 <= goodChoice && goodChoice <= 50) // De 26 à 50 : Case 2
     {
-      goodPokemon = pokemonNames[1];
       goodAnswerIndex = 1;
+      pokemonShout = pokemonChoices[1]!.shoutUrl;
     }
     else if(51 <= goodChoice && goodChoice <= 75) // De 51 à 75 : Case 3
     {
-      goodPokemon = pokemonNames[2];
       goodAnswerIndex = 2;
+      pokemonShout = pokemonChoices[2]!.shoutUrl;
     }
     else // De 76 à 100 : Case 4
     {
-      goodPokemon = pokemonNames[3];
       goodAnswerIndex = 3;
+      pokemonShout = pokemonChoices[3]!.shoutUrl;
     }
-    
-    // On récupère le cri, et on charge son URL dans une variable
-    await ApiController().getPokemonShout(goodPokemon).then((value){
-      setState(() {
-        pokemonShout = value!.url;
-        // Et une fois que le cri est récupéré, on attend 1 seconde avant de le jouer
-        Future.delayed(const Duration(seconds: 1), (){
-          audioPlugin.play(UrlSource(pokemonShout));
-        });
-      });
+
+    setState(() {
+      isLoading = false;
     });
   }
 
@@ -88,19 +103,31 @@ class _EasyModePageState extends State<EasyModePage> {
 
   @override
   Widget build(BuildContext context) {
+    if(!isLoading)
+    {
+      Future.delayed(const Duration(seconds: 1), (){
+        audioPlugin.play(UrlSource(pokemonShout));
+      });
+    }
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         title: Text(AppLocalizations.of(context)!.easy_mode, style: DesignHelper.titleStyle()),
       ),
-      body: pokemonShout.isEmpty
+      body: isLoading
             ? WaitingIndicator()
             : Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text("Score: $score pts"),
-                    Image.asset("assets/images/pokeball.png", width: MediaQuery.of(context).size.width * 0.6),
+                    GestureDetector(
+                      onTap: () {
+                        audioPlugin.play(UrlSource(pokemonShout));
+                      },
+                      child: Image.asset("assets/images/pokeball.png", width: MediaQuery.of(context).size.width * 0.6),
+                    ),
                     const SizedBox(height: 20,),
                     GridView.builder(
                       shrinkWrap: true,
@@ -117,7 +144,7 @@ class _EasyModePageState extends State<EasyModePage> {
                                 Navigator.of(context).pop();
                                 setState(() {
                                   score += 50;
-                                  initState();
+                                  getFileInfo();
                                 });
                               });
                             }
@@ -132,7 +159,10 @@ class _EasyModePageState extends State<EasyModePage> {
                             child: SizedBox(
                               height: MediaQuery.of(context).size.height * 0.2,
                               width: MediaQuery.of(context).size.height * 0.2,
-                              child: Image.network(pokemonChoices[index]!)
+                              child: FadeInImage.assetNetwork(
+                                placeholder: "assets/images/waiting.gif",
+                                image: pokemonChoices[index]!.imageUrl
+                              )
                             )
                           ),
                         );

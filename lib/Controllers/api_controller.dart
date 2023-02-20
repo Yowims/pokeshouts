@@ -43,7 +43,24 @@ class ApiController
 
       return fileInfo;
   }
+
+  Future<List<String>> searchStringsInHtml(String url) async 
+  {
+    final response = await http.get(Uri.parse(url));
+
+    final regex = RegExp(r'(https:\/\/)*www.pokepedia.fr\/images\/[a-zA-Z0-9\/_%-.]+(.ogg|.png)([a-zA-Z0-9\/_%-.])*(.ogg|.png)*');
+    final matches = regex.allMatches(response.body);
+
+    final List<String> strings = [];
+    for (final match in matches) {
+      strings.add(match.group(0)!);
+    }
+
+    return strings;
+  }
 }
+
+
 
 
 class MapHelper

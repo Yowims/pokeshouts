@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:pokeshouts/Views/easy_mode.dart';
 import 'package:pokeshouts/Views/main_menu.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pokeshouts/Views/test_pokemons.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,7 +37,8 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/':(context) => const MainMenuPage(),
-        '/easy':(context) => const EasyModePage()
+        '/easy':(context) => const EasyModePage(),
+        '/test':(context) => const TestPokemonPage()
       }
     );
   }
