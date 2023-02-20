@@ -2,9 +2,9 @@ import "package:flutter/material.dart";
 
 class WaitingIndicator extends StatelessWidget {
 
-  final String? text ;
+  final String? text;
 
-  WaitingIndicator([this.text]);
+  const WaitingIndicator([Key? key, this.text]) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

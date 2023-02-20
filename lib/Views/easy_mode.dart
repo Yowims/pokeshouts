@@ -1,10 +1,8 @@
 import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pokeshouts/Controllers/api_controller.dart';
 import 'package:pokeshouts/Controllers/gameplay_controller.dart';
-import 'package:pokeshouts/Models/file_info.dart';
 import 'package:pokeshouts/Models/pokemon.dart';
 import 'package:pokeshouts/Views/Components/waiting_indicator.dart';
 import 'package:pokeshouts/Views/Helpers/design_helper.dart';
@@ -39,8 +37,8 @@ class _EasyModePageState extends State<EasyModePage> {
     for(var i = 0; i<4; i++)
     {
       Pokemon pkmn = Pokemon.empty();
-      var randomPokemonIndex = Random().nextInt(650)+1;
-      var randomPokemon = PokedexHelper.pokedex[randomPokemonIndex]!; // De 1 à 649
+      var randomPokemonIndex = Random().nextInt(493)+1; // De 1 à 493
+      var randomPokemon = PokedexHelper.pokedex[randomPokemonIndex]!; 
 
       // On récupère les infos du pokémon depuis Poképédia
       await ApiController().searchStringsInHtml("https://www.pokepedia.fr/$randomPokemon").then((value) {
@@ -106,7 +104,7 @@ class _EasyModePageState extends State<EasyModePage> {
     if(!isLoading)
     {
       Future.delayed(const Duration(seconds: 1), (){
-        audioPlugin.play(UrlSource(pokemonShout));
+        audioPlugin.play(UrlSource("https://$pokemonShout"));
       });
     }
 
@@ -116,7 +114,7 @@ class _EasyModePageState extends State<EasyModePage> {
         title: Text(AppLocalizations.of(context)!.easy_mode, style: DesignHelper.titleStyle()),
       ),
       body: isLoading
-            ? WaitingIndicator()
+            ? const WaitingIndicator()
             : Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -124,7 +122,7 @@ class _EasyModePageState extends State<EasyModePage> {
                     Text("Score: $score pts"),
                     GestureDetector(
                       onTap: () {
-                        audioPlugin.play(UrlSource(pokemonShout));
+                        audioPlugin.play(UrlSource("https://$pokemonShout"));
                       },
                       child: Image.asset("assets/images/pokeball.png", width: MediaQuery.of(context).size.width * 0.6),
                     ),

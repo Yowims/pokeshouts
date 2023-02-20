@@ -1,8 +1,6 @@
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pokeshouts/Controllers/api_controller.dart';
-import 'package:pokeshouts/Models/file_info.dart';
 import 'package:pokeshouts/Models/pokemon.dart';
 import 'package:pokeshouts/Views/Components/waiting_indicator.dart';
 import 'package:pokeshouts/Views/Helpers/pokedex_helper.dart';
@@ -22,7 +20,7 @@ class _TestPokemonPageState extends State<TestPokemonPage> {
   Pokemon pokemon = Pokemon.empty();
   Pokemon pkmnFromHtmlPage = Pokemon.empty();
 
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
 
   bool isLoading = true;
 
@@ -77,7 +75,7 @@ class _TestPokemonPageState extends State<TestPokemonPage> {
           preferredSize: const Size.fromHeight(50),
           child: TextField(
             controller: _searchController,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               filled: true,
               fillColor: Colors.white
             ),
@@ -91,7 +89,7 @@ class _TestPokemonPageState extends State<TestPokemonPage> {
         )
       ),
       body: isLoading
-        ? WaitingIndicator()
+        ? const WaitingIndicator()
         : Center(
           child: SingleChildScrollView(
             physics: const NeverScrollableScrollPhysics(),
@@ -103,16 +101,16 @@ class _TestPokemonPageState extends State<TestPokemonPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("Cri : "),
+                    const Text("Cri : "),
                     pkmnFromHtmlPage.shoutUrl != "" ? const Icon(Icons.check) : const Icon(Icons.close),
                   ],
                 ),
-                Divider(),
-                pkmnFromHtmlPage.shoutUrl != null 
-                  ? TextButton(child: Icon(Icons.play_arrow), onPressed: (){
+                const Divider(),
+                pkmnFromHtmlPage.shoutUrl != "" 
+                  ? TextButton(child: const Icon(Icons.play_arrow), onPressed: (){
                     audioPlugin.play(UrlSource("https://${pkmnFromHtmlPage.shoutUrl}"));
                   },) 
-                  : TextButton(child: Icon(Icons.play_arrow), onPressed: null),
+                  : const TextButton(onPressed: null, child: Icon(Icons.play_arrow)),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
