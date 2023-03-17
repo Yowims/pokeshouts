@@ -37,7 +37,7 @@ class _EasyModePageState extends State<EasyModePage> {
     for(var i = 0; i<4; i++)
     {
       Pokemon pkmn = Pokemon.empty();
-      var randomPokemonIndex = Random().nextInt(493)+1; // De 1 à 493
+      var randomPokemonIndex = Random().nextInt(649)+1; // De 1 à 649
       var randomPokemon = PokedexHelper.pokedex[randomPokemonIndex]!; 
 
       // On récupère les infos du pokémon depuis Poképédia
