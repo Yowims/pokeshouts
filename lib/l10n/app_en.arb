@@ -1,4 +1,5 @@
 {
+    "@@locale": "en",
     "easy_mode": "Easy",
     "medium_mode": "Medium",
     "hard_mode": "Hard",
