@@ -1,9 +1,10 @@
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:pokeshouts/Controllers/api_controller.dart';
 import 'package:pokeshouts/Models/pokemon.dart';
 import 'package:pokeshouts/Views/Components/waiting_indicator.dart';
 import 'package:pokeshouts/Views/Helpers/pokedex_helper.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class TestPokemonPage extends StatefulWidget {
   const TestPokemonPage({Key? key}) : super(key: key);
@@ -13,7 +14,6 @@ class TestPokemonPage extends StatefulWidget {
 }
 
 class _TestPokemonPageState extends State<TestPokemonPage> {
-
   AudioPlayer audioPlugin = AudioPlayer();
 
   int index = 1;
@@ -24,122 +24,158 @@ class _TestPokemonPageState extends State<TestPokemonPage> {
 
   bool isLoading = true;
 
-  loadPokemonInfos()
-  {
+  loadPokemonInfos() async {
     setState(() {
       isLoading = true;
     });
-    ApiController().searchStringsInHtml("https://www.pokepedia.fr/${PokedexHelper.pokedex[index]!}").then((value) {
-      try
-      {
-        pkmnFromHtmlPage.index = index;
-        pkmnFromHtmlPage.name = PokedexHelper.pokedex[index]!;
-        pkmnFromHtmlPage.imageUrl = value.firstWhere((element) => element.contains(".png"));
-        pkmnFromHtmlPage.shoutUrl = value.firstWhere((element) => element.contains(".ogg"));
+    if (index > PokedexHelper.pokedex.length) {
+      setState(() {
+        isLoading = false;
+      });
+      return;
+    }
+    List<String> firstSearch = await ApiController().searchStringsInHtml("https://www.pokepedia.fr/${PokedexHelper.pokedex[index]!}");
+    try {
+      pkmnFromHtmlPage.index = index;
+      pkmnFromHtmlPage.name = PokedexHelper.pokedex[index]!;
+      pkmnFromHtmlPage.imageUrl = firstSearch.firstWhere((element) => element.contains(".png"));
+      pkmnFromHtmlPage.shoutUrl = firstSearch.firstWhere((element) => element.contains(".ogg"));
 
+      setState(() {
+        isLoading = false;
+      });
+    } catch (error) {
+      if (index > PokedexHelper.pokedex.length) {
         setState(() {
           isLoading = false;
         });
+        return;
       }
-      catch(error)
-      {
-        var pkmnName = PokedexHelper.pokedex[index]!;
-        var urlFormatted = pkmnName.replaceAll(r" ","_");
-        ApiController().searchStringsInHtml("https://www.pokepedia.fr/$urlFormatted").then((value) {
-          pkmnFromHtmlPage.index = index;
-          pkmnFromHtmlPage.name = PokedexHelper.pokedex[index]!;
-          pkmnFromHtmlPage.imageUrl = value.firstWhere((element) => element.contains(".png"));
-          pkmnFromHtmlPage.shoutUrl = value.firstWhere((element) => element.contains(".ogg"));
+      var pkmnName = PokedexHelper.pokedex[index]!;
+      var urlFormatted = pkmnName.replaceAll(r" ", "_");
+      List<String> secondSearch = await ApiController().searchStringsInHtml("https://www.pokepedia.fr/$urlFormatted");
+      pkmnFromHtmlPage.index = index;
+      pkmnFromHtmlPage.name = PokedexHelper.pokedex[index]!;
+      pkmnFromHtmlPage.imageUrl = secondSearch.firstWhere((element) => element.contains(".png"));
+      pkmnFromHtmlPage.shoutUrl = secondSearch.firstWhere((element) => element.contains(".ogg"));
 
-          setState(() {
-            isLoading = false;
-          });
-        });
-      }
-    });
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
-  
+
   @override
-  void initState(){
+  void initState() {
     index = 1;
     super.initState();
     loadPokemonInfos();
-    
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(50),
-          child: TextField(
+          bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(50),
+        child: TextField(
             controller: _searchController,
             decoration: const InputDecoration(
               filled: true,
-              fillColor: Colors.white
+              fillColor: Colors.white,
             ),
             keyboardType: TextInputType.number,
             onChanged: (value) {
+              if (value == "") {
+                value = "1";
+              }
               setState(() {
                 index = int.parse(value);
                 loadPokemonInfos();
               });
-          }),
-        )
-      ),
+            }),
+      )),
       body: isLoading
-        ? const WaitingIndicator()
-        : Center(
-          child: SingleChildScrollView(
-            physics: const NeverScrollableScrollPhysics(),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                FadeInImage.assetNetwork(placeholder: "assets/images/waiting.gif", image: pkmnFromHtmlPage.imageUrl, height: 300,),
-                Text("#${pkmnFromHtmlPage.index} - ${pkmnFromHtmlPage.name}"),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Cri : "),
-                    pkmnFromHtmlPage.shoutUrl != "" ? const Icon(Icons.check) : const Icon(Icons.close),
-                  ],
-                ),
-                const Divider(),
-                pkmnFromHtmlPage.shoutUrl != "" 
-                  ? TextButton(child: const Icon(Icons.play_arrow), onPressed: (){
-                    audioPlugin.play(UrlSource("https://${pkmnFromHtmlPage.shoutUrl}"));
-                  },) 
-                  : const TextButton(onPressed: null, child: Icon(Icons.play_arrow)),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TextButton(
-                      child: const Icon(Icons.arrow_left, size: 48),
-                      onPressed: (){
-                        setState(() {
-                          index--;
-                          loadPokemonInfos();
-                          _searchController.text = "";
-                        });
-                      },
-                    ),
-                    TextButton(
-                      child: const Icon(Icons.arrow_right, size: 48,),
-                      onPressed: (){
-                        setState(() {
-                          index++;
-                          loadPokemonInfos();
-                          _searchController.text = "";
-                        });
-                      },
-                    )
-                  ]
-                ),
-              ],
+          ? const WaitingIndicator()
+          : Center(
+              child: SingleChildScrollView(
+                physics: const NeverScrollableScrollPhysics(),
+                child: pkmnFromHtmlPage.index == 0 ? pkmnError(context) : pkmnWidgetTester(context),
+              ),
             ),
+    );
+  }
+
+  Widget pkmnError(BuildContext context) {
+    return Column(
+      children: [Text(AppLocalizations.of(context)!.not_implemented_pokemon)],
+    );
+  }
+
+  Widget pkmnWidgetTester(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        FadeInImage.assetNetwork(
+          placeholder: "assets/images/waiting.gif",
+          image: pkmnFromHtmlPage.imageUrl,
+          height: 300,
+        ),
+        Text("#${pkmnFromHtmlPage.index} - ${pkmnFromHtmlPage.name}"),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text("Cri : "),
+            pkmnFromHtmlPage.shoutUrl != "" ? const Icon(Icons.check) : const Icon(Icons.close),
+          ],
+        ),
+        const Divider(),
+        pkmnFromHtmlPage.shoutUrl != ""
+            ? TextButton(
+                child: const Icon(Icons.play_arrow),
+                onPressed: () async {
+                  if (!audioPlugin.playing) {
+                    await audioPlugin.setUrl("https://${pkmnFromHtmlPage.shoutUrl}");
+                    await audioPlugin.play();
+                    await audioPlugin.stop();
+                  }
+                },
+              )
+            : const TextButton(onPressed: null, child: Icon(Icons.play_arrow)),
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          TextButton(
+            child: const Icon(Icons.arrow_left, size: 48),
+            onPressed: () {
+              setState(() {
+                if (index-- < 0) {
+                  index = 1;
+                } else {
+                  index--;
+                }
+                loadPokemonInfos();
+                _searchController.text = "";
+              });
+            },
+          ),
+          TextButton(
+            child: const Icon(
+              Icons.arrow_right,
+              size: 48,
+            ),
+            onPressed: () {
+              setState(() {
+                if (index++ >= PokedexHelper.pokedex.length) {
+                  index = PokedexHelper.pokedex.length - 1;
+                } else {
+                  index++;
+                }
+                loadPokemonInfos();
+                _searchController.text = "";
+              });
+            },
           )
-        )
+        ]),
+      ],
     );
   }
 }

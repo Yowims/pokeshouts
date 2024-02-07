@@ -10,35 +10,34 @@ class MainMenuPage extends StatefulWidget {
 }
 
 class _MainMenuPageState extends State<MainMenuPage> {
-
   @override
   Widget build(BuildContext context) {
-
     double scale = 0.4;
 
-    Map<int,Image> images = {
+    Map<int, Image> images = {
       0: Image.asset("assets/images/pokeball.png", width: MediaQuery.of(context).size.width * scale),
       1: Image.asset("assets/images/superball.png", width: MediaQuery.of(context).size.width * scale),
       2: Image.asset("assets/images/ultraball.png", width: MediaQuery.of(context).size.width * scale),
-      3: Image.asset("assets/images/masterball.png", width: MediaQuery.of(context).size.width * scale)
+      3: Image.asset("assets/images/masterball.png", width: MediaQuery.of(context).size.width * scale),
     };
 
-    Map<int,String> texts = {
+    Map<int, String> texts = {
       0: AppLocalizations.of(context)!.easy_mode,
       1: AppLocalizations.of(context)!.medium_mode,
       2: AppLocalizations.of(context)!.hard_mode,
-      3: AppLocalizations.of(context)!.extreme_mode
+      3: AppLocalizations.of(context)!.extreme_mode,
     };
 
-    Map<int,String> routes = {
+    Map<int, String> routes = {
       0: "/easy",
       1: "/medium",
       2: "/hard",
-      3: "/extreme"
+      3: "/extreme",
     };
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).primaryColor,
         flexibleSpace: SizedBox(
           height: 150,
           child: Center(
@@ -51,37 +50,38 @@ class _MainMenuPageState extends State<MainMenuPage> {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: 4,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2), 
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
           itemBuilder: (context, index) {
             return GestureDetector(
-              onTap: (){
-                try{
+              onTap: () {
+                try {
                   Navigator.pushNamed(context, routes[index]!);
-                }
-                catch(error)
-                {
+                } catch (error) {
                   showDialog(
                     context: context,
                     builder: ((_) {
                       return AlertDialog(
                         content: Text(AppLocalizations.of(context)!.coming_soon),
                       );
-                    })
+                    }),
                   );
                 }
               },
               child: Column(
                 children: [
                   Container(child: images[index]),
-                  Text(texts[index]!, style: DesignHelper.gridTextStyle(context),)
+                  Text(
+                    texts[index]!,
+                    style: DesignHelper.gridTextStyle(context),
+                  )
                 ],
               ),
             );
-          }
+          },
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: (){
+        onPressed: () {
           Navigator.of(context).pushNamed('/test');
         },
         child: const Icon(Icons.assignment),
