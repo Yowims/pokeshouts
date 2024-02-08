@@ -102,6 +102,7 @@ class _EasyModePageState extends State<EasyModePage> {
         await audioPlugin.stop();
         await audioPlugin.setUrl("https://$pokemonShout");
         await audioPlugin.play();
+        await audioPlugin.stop();
       });
     }
 
@@ -152,7 +153,14 @@ class _EasyModePageState extends State<EasyModePage> {
                             GameplayController.lose(context);
                           }
                         },
-                        child: Padding(padding: const EdgeInsets.all(5), child: SizedBox(height: MediaQuery.of(context).size.height * 0.2, width: MediaQuery.of(context).size.height * 0.2, child: FadeInImage.assetNetwork(placeholder: "assets/images/waiting.gif", image: pokemonChoices[index]!.imageUrl))),
+                        child: Padding(
+                          padding: const EdgeInsets.all(5),
+                          child: SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.2,
+                            width: MediaQuery.of(context).size.height * 0.2,
+                            child: FadeInImage.assetNetwork(placeholder: "assets/images/waiting.gif", image: pokemonChoices[index]!.imageUrl),
+                          ),
+                        ),
                       );
                     }),
                   )
