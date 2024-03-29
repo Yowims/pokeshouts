@@ -41,6 +41,7 @@ dependencies:
   #audioplayers: ^5.2.1
   just_audio: ^0.9.36
   flutter_launcher_icons:
+  provider: ^6.1.2
   #cancellation_token: ^1.6.1
 
 dev_dependencies:
