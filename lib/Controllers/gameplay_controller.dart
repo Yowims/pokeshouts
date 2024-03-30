@@ -1,45 +1,10 @@
 import 'dart:math';
-
-import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:pokeshouts/Controllers/api_controller.dart';
 import 'package:pokeshouts/Models/pick_pokemon_result.dart';
 import 'package:pokeshouts/Models/pokemon.dart';
 import 'package:pokeshouts/Views/Helpers/pokedex_helper.dart';
 
 class GameplayController {
-  static void win(int points, BuildContext context, Function()? onPressed) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(AppLocalizations.of(context)!.congrats),
-          content: Text("${AppLocalizations.of(context)!.right_choice}$points pts"),
-          actions: [TextButton(onPressed: onPressed, child: const Text("OK"))],
-        );
-      },
-    );
-  }
-
-  static void lose(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(AppLocalizations.of(context)!.too_bad),
-          content: Text(AppLocalizations.of(context)!.wrong_choice),
-          actions: [
-            TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text("OK"))
-          ],
-        );
-      },
-    );
-  }
-
   static Future<PickPokemonResult> pickPokemons(Map<int, Pokemon> pokemonChoices, int goodAnswerIndex, String pokemonShout) async {
     // On définit les 4 cases du choix de Pokémon
     for (var i = 0; i < 4; i++) {
@@ -47,7 +12,7 @@ class GameplayController {
 
       // On itère dans une boucle infinie car il existe quelques entrées dans Poképédia (ex: Shifours et Wushours) qui n'ont pas de cri sur leur page
       while (true) {
-        var randomPokemonIndex = Random().nextInt(1025) + 1; // De 1 à 1025
+        var randomPokemonIndex = Random().nextInt(PokedexHelper.pokedex.length) + 1; // De 1 à 1025
 
         // Si l'un de mes éléments dans le tableau des Pokémon a le même index que celui défini aléatoirement,
         // alors on relance l'aléatoire pour récupérer un autre index et ce jusqu'à ce qu'il soit différent

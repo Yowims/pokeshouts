@@ -54,3 +54,37 @@ class PokemonChoiceGrid extends StatelessWidget {
     );
   }
 }
+
+// ignore: must_be_immutable
+class PokemonBadChoiceWidget extends StatelessWidget {
+  bool? isVisible = false;
+  PokemonBadChoiceWidget({super.key, required this.isVisible});
+
+  @override
+  Widget build(BuildContext context) {
+    return Visibility(
+      visible: isVisible ?? false,
+      child: Container(
+        decoration: const BoxDecoration(color: Colors.red),
+        child: const Center(child: Icon(Icons.close)),
+      ),
+    );
+  }
+}
+
+// ignore: must_be_immutable
+class PokemonGoodChoiceWidget extends StatelessWidget {
+  bool? isVisible = false;
+  PokemonGoodChoiceWidget({super.key, required this.isVisible});
+
+  @override
+  Widget build(BuildContext context) {
+    return Visibility(
+      visible: isVisible ?? false,
+      child: Container(
+        decoration: const BoxDecoration(color: Colors.green),
+        child: const Center(child: Icon(Icons.check)),
+      ),
+    );
+  }
+}

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pokeshouts/Providers/pokemon_loaded_provider.dart';
+import 'package:pokeshouts/Providers/round_timer_provider.dart';
 import 'package:pokeshouts/Views/easy_mode.dart';
 import 'package:pokeshouts/Views/main_menu.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -22,6 +23,7 @@ class PokeShoutsApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: ((context) => PokemonLoadedProvider())),
+        ChangeNotifierProvider(create: ((context) => RoundTimerProvider())),
       ],
       child: MaterialApp(
         title: 'Flutter Demo',

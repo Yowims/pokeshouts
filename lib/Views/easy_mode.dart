@@ -4,7 +4,9 @@ import 'package:pokeshouts/Controllers/gameplay_controller.dart';
 import 'package:pokeshouts/Models/pick_pokemon_result.dart';
 import 'package:pokeshouts/Models/pokemon.dart';
 import 'package:pokeshouts/Providers/pokemon_loaded_provider.dart';
+import 'package:pokeshouts/Providers/round_timer_provider.dart';
 import 'package:pokeshouts/Views/Components/pokemon_choice_grid.dart';
+import 'package:pokeshouts/Views/Components/timer_indicator.dart';
 import 'package:pokeshouts/Views/Components/waiting_indicator.dart';
 import 'package:pokeshouts/Views/Helpers/design_helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -18,6 +20,9 @@ class EasyModePage extends StatefulWidget {
 }
 
 class _EasyModePageState extends State<EasyModePage> {
+  bool roundFinished = false;
+  bool? rightAnswer;
+  bool? badAnswer;
   int score = 0;
 
   AudioPlayer audioPlugin = AudioPlayer();
@@ -68,51 +73,118 @@ class _EasyModePageState extends State<EasyModePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text(AppLocalizations.of(context)!.easy_mode, style: DesignHelper.titleStyle()),
-      ),
-      body: isLoading
-          ? const WaitingIndicator()
-          : Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+    return PopScope(
+      onPopInvoked: (didPop) {
+        RoundTimerProvider roundTimerProvider = Provider.of<RoundTimerProvider>(context, listen: false);
+        roundTimerProvider.setTimer = 60;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          title: Text(AppLocalizations.of(context)!.easy_mode, style: DesignHelper.titleStyle()),
+        ),
+        body: isLoading
+            ? const WaitingIndicator()
+            : Stack(
                 children: [
-                  Text("Score: $score pts"),
-                  GestureDetector(
-                    onTap: () async {
-                      if (!audioPlugin.playing) {
-                        await audioPlugin.setUrl("https://$pokemonShout");
-                        await audioPlugin.play();
-                        await audioPlugin.stop();
-                      }
-                    },
-                    child: Image.asset("assets/images/pokeball.png", width: MediaQuery.of(context).size.width * 0.6),
+                  Positioned(
+                    top: 5,
+                    right: 5,
+                    child: TimerIndicator(
+                      seconds: 60,
+                      onTimerFinished: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: Text("Temps écoulé !"),
+                              content: Center(
+                                child: RichText(
+                                  text: TextSpan(
+                                    children: [
+                                      TextSpan(text: "Le temps imparti pour cette manche est écoulé."),
+                                      TextSpan(text: "Vous avez marqué $score points."),
+                                      TextSpan(text: "Félicitations !"),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).popUntil(ModalRoute.withName("/"));
+                                  },
+                                  child: Text("OK"),
+                                )
+                              ],
+                            );
+                          },
+                        );
+                      },
+                    ),
                   ),
-                  const SizedBox(
-                    height: 20,
+                  Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Score: $score pts"),
+                        GestureDetector(
+                          onTap: () async {
+                            if (!audioPlugin.playing) {
+                              await audioPlugin.setUrl("https://$pokemonShout");
+                              await audioPlugin.play();
+                              await audioPlugin.stop();
+                            }
+                          },
+                          child: Image.asset("assets/images/pokeball.png", width: MediaQuery.of(context).size.width * 0.6),
+                        ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        Stack(
+                          children: [
+                            PokemonChoiceGrid(
+                              pokemonChoices: pokemonChoices,
+                              onChoiceMade: (index) {
+                                if (goodAnswerIndex == index) {
+                                  // Si le joueur tape sur la bonne case, on met un écran vert devant les choix et on passe au suivant
+                                  setState(() {
+                                    score += 50;
+                                    rightAnswer = true;
+                                  });
+                                  Future.delayed(Duration(milliseconds: 200), () {
+                                    setState(() {
+                                      rightAnswer = null;
+                                      getFileInfo();
+                                    });
+                                  });
+                                } else {
+                                  // Sinon on met un écran rouge devant les choix
+                                  setState(() {
+                                    badAnswer = true;
+                                  });
+                                  Future.delayed(Duration(milliseconds: 200), () {
+                                    setState(() {
+                                      badAnswer = null;
+                                    });
+                                  });
+                                }
+                              },
+                            ),
+                            PokemonGoodChoiceWidget(
+                              isVisible: rightAnswer,
+                            ),
+                            PokemonBadChoiceWidget(
+                              isVisible: badAnswer,
+                            )
+                          ],
+                        )
+                      ],
+                    ),
                   ),
-                  PokemonChoiceGrid(
-                      pokemonChoices: pokemonChoices,
-                      onChoiceMade: (index) {
-                        if (goodAnswerIndex == index) {
-                          // Si le joueur tape sur la bonne case, on affiche une modal d'info et on passe à la manche suivante
-                          GameplayController.win(50, context, () {
-                            Navigator.of(context).pop();
-                            setState(() {
-                              score += 50;
-                              getFileInfo();
-                            });
-                          });
-                        } else {
-                          // Sinon on l'informe qu'il s'est trompé et on reste sur cette manche
-                          GameplayController.lose(context);
-                        }
-                      })
                 ],
               ),
-            ),
+      ),
     );
   }
 }

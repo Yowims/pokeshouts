@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:pokeshouts/Views/Helpers/design_helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -84,7 +85,10 @@ class _MainMenuPageState extends State<MainMenuPage> {
         onPressed: () {
           Navigator.of(context).pushNamed('/test');
         },
-        child: const Icon(Icons.assignment),
+        child: SvgPicture.asset(
+          "assets/images/Pokedex.svg",
+          semanticsLabel: "Pokedex Logo",
+        ),
       ),
     );
   }

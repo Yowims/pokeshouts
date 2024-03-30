@@ -28,7 +28,7 @@ class _TestPokemonPageState extends State<TestPokemonPage> {
     setState(() {
       isLoading = true;
     });
-    if (index > PokedexHelper.pokedex.length) {
+    if (index > PokedexHelper.pokedex.length || index <= 0) {
       setState(() {
         isLoading = false;
       });
@@ -56,8 +56,14 @@ class _TestPokemonPageState extends State<TestPokemonPage> {
       List<String> secondSearch = await ApiController().searchStringsInHtml("https://www.pokepedia.fr/$urlFormatted");
       pkmnFromHtmlPage.index = index;
       pkmnFromHtmlPage.name = PokedexHelper.pokedex[index]!;
-      pkmnFromHtmlPage.imageUrl = secondSearch.firstWhere((element) => element.contains(".png"));
-      pkmnFromHtmlPage.shoutUrl = secondSearch.firstWhere((element) => element.contains(".ogg"));
+      pkmnFromHtmlPage.imageUrl = secondSearch.firstWhere(
+        (element) => element.contains(".png"),
+        orElse: () => "",
+      );
+      pkmnFromHtmlPage.shoutUrl = secondSearch.firstWhere(
+        (element) => element.contains(".ogg"),
+        orElse: () => "",
+      );
 
       setState(() {
         isLoading = false;
@@ -86,7 +92,7 @@ class _TestPokemonPageState extends State<TestPokemonPage> {
             ),
             keyboardType: TextInputType.number,
             onChanged: (value) {
-              if (value == "") {
+              if (value == "" || int.parse(value) > PokedexHelper.pokedex.length) {
                 value = "1";
               }
               setState(() {
@@ -116,11 +122,13 @@ class _TestPokemonPageState extends State<TestPokemonPage> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        FadeInImage.assetNetwork(
-          placeholder: "assets/images/waiting.gif",
-          image: pkmnFromHtmlPage.imageUrl,
-          height: 300,
-        ),
+        pkmnFromHtmlPage.imageUrl != ""
+            ? FadeInImage.assetNetwork(
+                placeholder: "assets/images/waiting.gif",
+                image: pkmnFromHtmlPage.imageUrl,
+                height: 300,
+              )
+            : Center(child: Text(AppLocalizations.of(context)!.not_implemented_pokemon)),
         Text("#${pkmnFromHtmlPage.index} - ${pkmnFromHtmlPage.name}"),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -145,34 +153,40 @@ class _TestPokemonPageState extends State<TestPokemonPage> {
         Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           TextButton(
             child: const Icon(Icons.arrow_left, size: 48),
-            onPressed: () {
-              setState(() {
-                if (index-- < 0) {
-                  index = 1;
-                } else {
-                  index--;
-                }
-                loadPokemonInfos();
-                _searchController.text = "";
-              });
-            },
+            onPressed: index <= 1
+                ? null
+                : () {
+                    setState(() {
+                      int newIndex = index - 1;
+                      if (newIndex < 0) {
+                        index = 1;
+                      } else {
+                        index = newIndex;
+                      }
+                      loadPokemonInfos();
+                      _searchController.text = "";
+                    });
+                  },
           ),
           TextButton(
             child: const Icon(
               Icons.arrow_right,
               size: 48,
             ),
-            onPressed: () {
-              setState(() {
-                if (index++ >= PokedexHelper.pokedex.length) {
-                  index = PokedexHelper.pokedex.length - 1;
-                } else {
-                  index++;
-                }
-                loadPokemonInfos();
-                _searchController.text = "";
-              });
-            },
+            onPressed: index >= PokedexHelper.pokedex.length
+                ? null
+                : () {
+                    setState(() {
+                      int newIndex = index + 1;
+                      if (newIndex > PokedexHelper.pokedex.length) {
+                        index = PokedexHelper.pokedex.length - 1;
+                      } else {
+                        index = newIndex;
+                      }
+                      loadPokemonInfos();
+                      _searchController.text = "";
+                    });
+                  },
           )
         ]),
       ],
