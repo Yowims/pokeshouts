@@ -1,29 +1,55 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:pokeshouts/Models/pokemon.dart';
 import 'package:pokeshouts/Providers/pokemon_loaded_provider.dart';
 import 'package:provider/provider.dart';
 
-class PokemonChoiceGrid extends StatelessWidget {
+class PokemonChoiceGrid extends StatefulWidget {
   final Map<int, Pokemon> pokemonChoices;
   final Function(int) onChoiceMade;
 
   const PokemonChoiceGrid({super.key, required this.pokemonChoices, required this.onChoiceMade});
 
   @override
-  Widget build(BuildContext context) {
-    final pokemonLoadedProvider = context.watch<PokemonLoadedProvider>();
-    Map<int, bool> actualPokemonLoadedImages = pokemonLoadedProvider.getPokemonImagesLoaded;
+  State<PokemonChoiceGrid> createState() => _PokemonChoiceGridState();
+}
+
+class _PokemonChoiceGridState extends State<PokemonChoiceGrid> {
+  late PokemonLoadedProvider pokemonLoadedProvider;
+  late Map<int, bool> actualPokemonLoadedImages;
+
+  @override
+  void initState() {
+    super.initState();
+    pokemonLoadedProvider = context.read<PokemonLoadedProvider>();
+
+    actualPokemonLoadedImages = pokemonLoadedProvider.getPokemonImagesLoaded;
     pokemonLoadedProvider.setPokemonImagesLoaded = {0: false, 1: false, 2: false, 3: false};
+    for (var element in actualPokemonLoadedImages.entries) {
+      if (element.value == false) {
+        DefaultCacheManager().getFileFromCache(widget.pokemonChoices[element.key]!.index.toString()).then((fileInfo) {
+          if (fileInfo != null) {
+            print("IMAGE ${element.key} CHARGÉE DEPUIS LE CACHE");
+            actualPokemonLoadedImages[element.key] = true;
+            pokemonLoadedProvider.setPokemonImagesLoaded = actualPokemonLoadedImages;
+          }
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: 4,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-      itemBuilder: ((context, index) {
+      itemBuilder: (context, index) {
         return GestureDetector(
           onTap: () {
-            onChoiceMade(index);
+            widget.onChoiceMade(index);
           },
           child: Padding(
             padding: const EdgeInsets.all(5),
@@ -31,40 +57,43 @@ class PokemonChoiceGrid extends StatelessWidget {
               height: MediaQuery.of(context).size.height * 0.2,
               width: MediaQuery.of(context).size.height * 0.2,
               child: CachedNetworkImage(
-                imageUrl: pokemonChoices[index]!.imageUrl,
+                cacheManager: DefaultCacheManager(),
+                imageUrl: widget.pokemonChoices[index]!.imageUrl,
                 fadeOutDuration: const Duration(milliseconds: 100),
                 progressIndicatorBuilder: (context, url, downloadProgress) {
                   if (downloadProgress.progress != null && downloadProgress.progress! == 1) {
                     actualPokemonLoadedImages[index] = true;
                     pokemonLoadedProvider.setPokemonImagesLoaded = actualPokemonLoadedImages;
                     print("IMAGE $index CHARGÉE");
-                    return Image(image: CachedNetworkImageProvider(url));
+                    DefaultCacheManager().downloadFile(widget.pokemonChoices[index]!.imageUrl, key: widget.pokemonChoices[index]!.index.toString());
+                    return Image(
+                      image: CachedNetworkImageProvider(url, cacheManager: DefaultCacheManager()),
+                    );
                   } else {
                     return Image.asset("assets/images/waiting.gif");
                   }
                 },
-                imageBuilder: (context, imageProvider) {
-                  if (!(actualPokemonLoadedImages.values.any((element) => element == true))) {
-                    actualPokemonLoadedImages[index] = true;
-                    pokemonLoadedProvider.setPokemonImagesLoaded = actualPokemonLoadedImages;
-                  }
-                  return Image(
-                    image: imageProvider,
-                  );
-                },
+                // imageBuilder: (context, imageProvider) {
+                //   if (!(actualPokemonLoadedImages.values.any((element) => element == true))) {
+                //     actualPokemonLoadedImages[index] = true;
+                //     pokemonLoadedProvider.setPokemonImagesLoaded = actualPokemonLoadedImages;
+                //   }
+                //   return Image(
+                //     image: imageProvider,
+                //   );
+                // },
               ),
             ),
           ),
         );
-      }),
+      },
     );
   }
 }
 
-// ignore: must_be_immutable
 class PokemonBadChoiceWidget extends StatelessWidget {
-  bool? isVisible = false;
-  PokemonBadChoiceWidget({super.key, required this.isVisible});
+  final bool? isVisible;
+  const PokemonBadChoiceWidget({super.key, this.isVisible = false});
 
   @override
   Widget build(BuildContext context) {
@@ -78,10 +107,9 @@ class PokemonBadChoiceWidget extends StatelessWidget {
   }
 }
 
-// ignore: must_be_immutable
 class PokemonGoodChoiceWidget extends StatelessWidget {
-  bool? isVisible = false;
-  PokemonGoodChoiceWidget({super.key, required this.isVisible});
+  final bool? isVisible;
+  const PokemonGoodChoiceWidget({super.key, this.isVisible = false});
 
   @override
   Widget build(BuildContext context) {

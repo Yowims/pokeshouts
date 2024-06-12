@@ -30,6 +30,7 @@ class _EasyModePageState extends State<EasyModePage> {
   Map<int, Pokemon> pokemonChoices = {};
   String pokemonShout = "";
   int goodAnswerIndex = 0;
+  double pokeballScale = 1;
 
   bool isLoading = false;
 
@@ -46,6 +47,14 @@ class _EasyModePageState extends State<EasyModePage> {
     setState(() {
       isLoading = false;
     });
+  }
+
+  void _changeScaleDown() {
+    setState(() => pokeballScale = 0.95);
+  }
+
+  void _changeScaleUp() {
+    setState(() => pokeballScale = 1);
   }
 
   @override
@@ -92,15 +101,17 @@ class _EasyModePageState extends State<EasyModePage> {
                     top: 5,
                     right: 5,
                     child: TimerIndicator(
-                      seconds: 60,
+                      seconds: 600,
                       onTimerFinished: () {
                         showDialog(
                           context: context,
+                          barrierDismissible: false,
                           builder: (context) {
                             return AlertDialog(
                               title: const Text("Temps écoulé !"),
                               content: Center(
                                 child: Column(
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
                                     const Text("Le temps imparti pour cette manche est écoulé."),
                                     Text("Vous avez marqué $score points."),
@@ -129,13 +140,23 @@ class _EasyModePageState extends State<EasyModePage> {
                         Text("Score: $score pts"),
                         GestureDetector(
                           onTap: () async {
+                            _changeScaleDown();
                             if (!audioPlugin.playing) {
-                              await audioPlugin.setUrl(pokemonShout);
-                              await audioPlugin.play();
                               await audioPlugin.stop();
                             }
+                            await audioPlugin.setUrl(pokemonShout);
+                            await audioPlugin.play();
+                            await audioPlugin.stop();
+                            _changeScaleUp();
                           },
-                          child: Image.asset("assets/images/pokeball.png", width: MediaQuery.of(context).size.width * 0.6),
+                          child: AnimatedScale(
+                            scale: pokeballScale,
+                            duration: const Duration(milliseconds: 200),
+                            child: Image.asset(
+                              "assets/images/pokeball.png",
+                              width: MediaQuery.of(context).size.width * 0.6,
+                            ),
+                          ),
                         ),
                         const SizedBox(
                           height: 20,
