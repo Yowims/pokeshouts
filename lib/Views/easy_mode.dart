@@ -61,9 +61,10 @@ class _EasyModePageState extends State<EasyModePage> {
     final pokemonImagesLoadedProvider = context.watch<PokemonLoadedProvider>();
     pokemonImagesLoadedProvider.onPokemonImageLoaded = (pokemonImagesLoaded) {
       if (pokemonImagesLoaded.values.every((element) => element == true)) {
-        Future.delayed(const Duration(milliseconds: 500), () async {
+        Future.delayed(const Duration(milliseconds: 200), () async {
+          print("---");
           await audioPlugin.stop();
-          await audioPlugin.setUrl("https://$pokemonShout");
+          await audioPlugin.setUrl(pokemonShout);
           await audioPlugin.play();
           await audioPlugin.stop();
         });
@@ -97,16 +98,14 @@ class _EasyModePageState extends State<EasyModePage> {
                           context: context,
                           builder: (context) {
                             return AlertDialog(
-                              title: Text("Temps écoulé !"),
+                              title: const Text("Temps écoulé !"),
                               content: Center(
-                                child: RichText(
-                                  text: TextSpan(
-                                    children: [
-                                      TextSpan(text: "Le temps imparti pour cette manche est écoulé."),
-                                      TextSpan(text: "Vous avez marqué $score points."),
-                                      TextSpan(text: "Félicitations !"),
-                                    ],
-                                  ),
+                                child: Column(
+                                  children: [
+                                    const Text("Le temps imparti pour cette manche est écoulé."),
+                                    Text("Vous avez marqué $score points."),
+                                    const Text("Félicitations !"),
+                                  ],
                                 ),
                               ),
                               actions: [
@@ -114,7 +113,7 @@ class _EasyModePageState extends State<EasyModePage> {
                                   onPressed: () {
                                     Navigator.of(context).popUntil(ModalRoute.withName("/"));
                                   },
-                                  child: Text("OK"),
+                                  child: const Text("OK"),
                                 )
                               ],
                             );
@@ -131,7 +130,7 @@ class _EasyModePageState extends State<EasyModePage> {
                         GestureDetector(
                           onTap: () async {
                             if (!audioPlugin.playing) {
-                              await audioPlugin.setUrl("https://$pokemonShout");
+                              await audioPlugin.setUrl(pokemonShout);
                               await audioPlugin.play();
                               await audioPlugin.stop();
                             }
@@ -152,7 +151,7 @@ class _EasyModePageState extends State<EasyModePage> {
                                     score += 50;
                                     rightAnswer = true;
                                   });
-                                  Future.delayed(Duration(milliseconds: 200), () {
+                                  Future.delayed(const Duration(milliseconds: 200), () {
                                     setState(() {
                                       rightAnswer = null;
                                       getFileInfo();
@@ -163,7 +162,7 @@ class _EasyModePageState extends State<EasyModePage> {
                                   setState(() {
                                     badAnswer = true;
                                   });
-                                  Future.delayed(Duration(milliseconds: 200), () {
+                                  Future.delayed(const Duration(milliseconds: 200), () {
                                     setState(() {
                                       badAnswer = null;
                                     });

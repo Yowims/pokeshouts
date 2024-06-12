@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:pokeshouts/Models/pokemon.dart';
 import 'package:pokeshouts/Providers/pokemon_loaded_provider.dart';
@@ -12,6 +13,7 @@ class PokemonChoiceGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pokemonLoadedProvider = context.watch<PokemonLoadedProvider>();
+    Map<int, bool> actualPokemonLoadedImages = pokemonLoadedProvider.getPokemonImagesLoaded;
     pokemonLoadedProvider.setPokemonImagesLoaded = {0: false, 1: false, 2: false, 3: false};
     return GridView.builder(
       shrinkWrap: true,
@@ -28,23 +30,27 @@ class PokemonChoiceGrid extends StatelessWidget {
             child: SizedBox(
               height: MediaQuery.of(context).size.height * 0.2,
               width: MediaQuery.of(context).size.height * 0.2,
-              child: Image.network(
-                pokemonChoices[index]!.imageUrl,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress != null && loadingProgress.expectedTotalBytes != null) {
-                    double percentage = (loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!) * 100;
-
-                    if (percentage < 100) {
-                      return Image.asset("assets/images/waiting.gif");
-                    } else {
-                      Map<int, bool> actualPokemonLoadedImages = pokemonLoadedProvider.getPokemonImagesLoaded;
-                      actualPokemonLoadedImages[index] = true;
-                      pokemonLoadedProvider.setPokemonImagesLoaded = actualPokemonLoadedImages;
-                      return child;
-                    }
+              child: CachedNetworkImage(
+                imageUrl: pokemonChoices[index]!.imageUrl,
+                fadeOutDuration: const Duration(milliseconds: 100),
+                progressIndicatorBuilder: (context, url, downloadProgress) {
+                  if (downloadProgress.progress != null && downloadProgress.progress! == 1) {
+                    actualPokemonLoadedImages[index] = true;
+                    pokemonLoadedProvider.setPokemonImagesLoaded = actualPokemonLoadedImages;
+                    print("IMAGE $index CHARGÉE");
+                    return Image(image: CachedNetworkImageProvider(url));
                   } else {
-                    return child;
+                    return Image.asset("assets/images/waiting.gif");
                   }
+                },
+                imageBuilder: (context, imageProvider) {
+                  if (!(actualPokemonLoadedImages.values.any((element) => element == true))) {
+                    actualPokemonLoadedImages[index] = true;
+                    pokemonLoadedProvider.setPokemonImagesLoaded = actualPokemonLoadedImages;
+                  }
+                  return Image(
+                    image: imageProvider,
+                  );
                 },
               ),
             ),
@@ -88,3 +94,31 @@ class PokemonGoodChoiceWidget extends StatelessWidget {
     );
   }
 }
+
+
+
+// Image.network(
+//                 pokemonChoices[index]!.imageUrl,
+//                 loadingBuilder: (context, child, loadingProgress) {
+//                   if (loadingProgress != null && loadingProgress.expectedTotalBytes != null) {
+//                     double percentage = (loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!) * 100;
+
+//                     if (percentage < 100) {
+//                       return Image.asset("assets/images/waiting.gif");
+//                     } else {
+//                       print("IMAGE N°$index chargée");
+//                       Map<int, bool> actualPokemonLoadedImages = pokemonLoadedProvider.getPokemonImagesLoaded;
+//                       actualPokemonLoadedImages[index] = true;
+//                       pokemonLoadedProvider.setPokemonImagesLoaded = actualPokemonLoadedImages;
+//                       return child;
+//                     }
+//                   } else {
+//                     print("ELSE - IMAGE N°$index chargée");
+//                     return child;
+//                   }
+//                 },
+//                 frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+//                   print("FRAMEBUILDER - IMAGE N°$index CHARGÉE");
+//                   return child;
+//                 },
+//               )

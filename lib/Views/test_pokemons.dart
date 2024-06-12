@@ -15,16 +15,16 @@ class TestPokemonPage extends StatefulWidget {
 
 class _TestPokemonPageState extends State<TestPokemonPage> {
   AudioPlayer audioPlugin = AudioPlayer();
+  ApiController apiController = ApiController();
 
   int index = 1;
   Pokemon pokemon = Pokemon.empty();
-  Pokemon pkmnFromHtmlPage = Pokemon.empty();
 
   final TextEditingController _searchController = TextEditingController();
 
   bool isLoading = true;
 
-  loadPokemonInfos() async {
+  void loadPokemonInfos() async {
     setState(() {
       isLoading = true;
     });
@@ -34,41 +34,12 @@ class _TestPokemonPageState extends State<TestPokemonPage> {
       });
       return;
     }
-    List<String> firstSearch = await ApiController().searchStringsInHtml("https://www.pokepedia.fr/${PokedexHelper.pokedex[index]!}");
-    try {
-      pkmnFromHtmlPage.index = index;
-      pkmnFromHtmlPage.name = PokedexHelper.pokedex[index]!;
-      pkmnFromHtmlPage.imageUrl = firstSearch.firstWhere((element) => element.contains(".png"));
-      pkmnFromHtmlPage.shoutUrl = firstSearch.firstWhere((element) => element.contains(".ogg"));
 
-      setState(() {
-        isLoading = false;
-      });
-    } catch (error) {
-      if (index > PokedexHelper.pokedex.length) {
-        setState(() {
-          isLoading = false;
-        });
-        return;
-      }
-      var pkmnName = PokedexHelper.pokedex[index]!;
-      var urlFormatted = pkmnName.replaceAll(r" ", "_");
-      List<String> secondSearch = await ApiController().searchStringsInHtml("https://www.pokepedia.fr/$urlFormatted");
-      pkmnFromHtmlPage.index = index;
-      pkmnFromHtmlPage.name = PokedexHelper.pokedex[index]!;
-      pkmnFromHtmlPage.imageUrl = secondSearch.firstWhere(
-        (element) => element.contains(".png"),
-        orElse: () => "",
-      );
-      pkmnFromHtmlPage.shoutUrl = secondSearch.firstWhere(
-        (element) => element.contains(".ogg"),
-        orElse: () => "",
-      );
+    pokemon = await apiController.getPokemonInfosAsync(index);
 
-      setState(() {
-        isLoading = false;
-      });
-    }
+    setState(() {
+      isLoading = false;
+    });
   }
 
   @override
@@ -106,7 +77,7 @@ class _TestPokemonPageState extends State<TestPokemonPage> {
           : Center(
               child: SingleChildScrollView(
                 physics: const NeverScrollableScrollPhysics(),
-                child: pkmnFromHtmlPage.index == 0 ? pkmnError(context) : pkmnWidgetTester(context),
+                child: pokemon.index == 0 ? pkmnError(context) : pkmnWidgetTester(context),
               ),
             ),
     );
@@ -122,28 +93,28 @@ class _TestPokemonPageState extends State<TestPokemonPage> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        pkmnFromHtmlPage.imageUrl != ""
+        pokemon.imageUrl != ""
             ? FadeInImage.assetNetwork(
                 placeholder: "assets/images/waiting.gif",
-                image: pkmnFromHtmlPage.imageUrl,
+                image: pokemon.imageUrl,
                 height: 300,
               )
             : Center(child: Text(AppLocalizations.of(context)!.not_implemented_pokemon)),
-        Text("#${pkmnFromHtmlPage.index} - ${pkmnFromHtmlPage.name}"),
+        Text("#${pokemon.index} - ${pokemon.name}"),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text("Cri : "),
-            pkmnFromHtmlPage.shoutUrl != "" ? const Icon(Icons.check) : const Icon(Icons.close),
+            pokemon.shoutUrl != "" ? const Icon(Icons.check) : const Icon(Icons.close),
           ],
         ),
         const Divider(),
-        pkmnFromHtmlPage.shoutUrl != ""
+        pokemon.shoutUrl != ""
             ? TextButton(
                 child: const Icon(Icons.play_arrow),
                 onPressed: () async {
                   if (!audioPlugin.playing) {
-                    await audioPlugin.setUrl("https://${pkmnFromHtmlPage.shoutUrl}");
+                    await audioPlugin.setUrl(pokemon.shoutUrl);
                     await audioPlugin.play();
                     await audioPlugin.stop();
                   }
@@ -152,7 +123,6 @@ class _TestPokemonPageState extends State<TestPokemonPage> {
             : const TextButton(onPressed: null, child: Icon(Icons.play_arrow)),
         Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           TextButton(
-            child: const Icon(Icons.arrow_left, size: 48),
             onPressed: index <= 1
                 ? null
                 : () {
@@ -167,12 +137,9 @@ class _TestPokemonPageState extends State<TestPokemonPage> {
                       _searchController.text = "";
                     });
                   },
+            child: const Icon(Icons.arrow_left, size: 48),
           ),
           TextButton(
-            child: const Icon(
-              Icons.arrow_right,
-              size: 48,
-            ),
             onPressed: index >= PokedexHelper.pokedex.length
                 ? null
                 : () {
@@ -187,6 +154,10 @@ class _TestPokemonPageState extends State<TestPokemonPage> {
                       _searchController.text = "";
                     });
                   },
+            child: const Icon(
+              Icons.arrow_right,
+              size: 48,
+            ),
           )
         ]),
       ],

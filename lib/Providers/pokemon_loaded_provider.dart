@@ -8,6 +8,7 @@ class PokemonLoadedProvider extends ChangeNotifier {
   Map<int, bool> get getPokemonImagesLoaded => _pokemonImagesLoaded;
   set setPokemonImagesLoaded(Map<int, bool> pokemonImagesLoaded) {
     _pokemonImagesLoaded = pokemonImagesLoaded;
+    print(_pokemonImagesLoaded);
     onPokemonImageLoaded?.call(_pokemonImagesLoaded);
   }
 }

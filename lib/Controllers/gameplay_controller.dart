@@ -5,6 +5,8 @@ import 'package:pokeshouts/Models/pokemon.dart';
 import 'package:pokeshouts/Views/Helpers/pokedex_helper.dart';
 
 class GameplayController {
+  static final ApiController apiController = ApiController();
+
   static Future<PickPokemonResult> pickPokemons(Map<int, Pokemon> pokemonChoices, int goodAnswerIndex, String pokemonShout) async {
     // On définit les 4 cases du choix de Pokémon
     for (var i = 0; i < 4; i++) {
@@ -18,23 +20,11 @@ class GameplayController {
         // alors on relance l'aléatoire pour récupérer un autre index et ce jusqu'à ce qu'il soit différent
         // de toutes les entrées existantes dans la liste déjà récupérée
         while (pokemonChoices.entries.any((element) => element.value.index == randomPokemonIndex)) {
-          randomPokemonIndex = Random().nextInt(1025) + 1;
+          randomPokemonIndex = Random().nextInt(PokedexHelper.pokedex.length) + 1;
         }
-        var randomPokemon = PokedexHelper.pokedex[randomPokemonIndex]!;
-        var urlFormatted = randomPokemon.replaceAll(r" ", "_");
-        // On récupère les infos du pokémon depuis Poképédia
-        List<String> secondSearch = await ApiController().searchStringsInHtml("https://www.pokepedia.fr/$urlFormatted");
-        pkmn.index = randomPokemonIndex;
-        pkmn.name = randomPokemon;
 
-        pkmn.imageUrl = secondSearch.firstWhere(
-          (element) => element.contains(".png"),
-          orElse: () => "",
-        );
-        pkmn.shoutUrl = secondSearch.firstWhere(
-          (element) => element.contains(".ogg"),
-          orElse: () => "",
-        );
+        // On récupère les infos du pokémon depuis MediaWiki
+        pkmn = await apiController.getPokemonInfosAsync(randomPokemonIndex);
 
         // Si l'élément recherché ne contient pas de cri ou d'image, alors on repart dans la boucle pour relancer une nouvelle recherche
         if (pkmn.imageUrl == "" || pkmn.shoutUrl == "") {
