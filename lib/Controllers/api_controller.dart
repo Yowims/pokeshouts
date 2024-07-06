@@ -25,6 +25,9 @@ class ApiController {
     throw Exception("Image non trouvée, ou parsing échoué.");
   }
 
+  /// Méthode pour récupérer le cri de Pokmon depuis MediaWiki
+  /// => Méthode pas fiable, les fichiers OGG sont pas toujours présents dans les retours MediaWiki,
+  /// en attente d'une refonte
   Future<String> _getPokemonShoutUrlAsync(String pkmnName) async {
     http.Response response = await http.get(Uri.parse("$_baseUrl?action=query&prop=images&titles=$pkmnName&format=json"));
     if (response.statusCode == 200) {

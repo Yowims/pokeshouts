@@ -1,13 +1,16 @@
 import 'dart:math';
+import 'package:flutter/material.dart';
 import 'package:pokeshouts/Controllers/api_controller.dart';
 import 'package:pokeshouts/Models/pick_pokemon_result.dart';
 import 'package:pokeshouts/Models/pokemon.dart';
+import 'package:pokeshouts/Providers/pokemon_loaded_provider.dart';
 import 'package:pokeshouts/Views/Helpers/pokedex_helper.dart';
+import 'package:provider/provider.dart';
 
 class GameplayController {
   static final ApiController apiController = ApiController();
 
-  static Future<PickPokemonResult> pickPokemons(Map<int, Pokemon> pokemonChoices, int goodAnswerIndex, String pokemonShout) async {
+  static Future<PickPokemonResult> pickPokemons(BuildContext context, Map<int, Pokemon> pokemonChoices, int goodAnswerIndex, String pokemonShout) async {
     // On définit les 4 cases du choix de Pokémon
     for (var i = 0; i < 4; i++) {
       Pokemon pkmn = Pokemon.empty();
@@ -55,6 +58,11 @@ class GameplayController {
     {
       goodAnswerIndex = 3;
       pokemonShout = pokemonChoices[3]!.shoutUrl;
+    }
+
+    if (context.mounted) {
+      PokemonLoadedProvider pokemonLoadedProvider = Provider.of<PokemonLoadedProvider>(context, listen: false);
+      pokemonLoadedProvider.setPokemonImagesLoaded = pokemonChoices;
     }
 
     return PickPokemonResult(pokemonChoices, goodAnswerIndex, pokemonShout);
