@@ -64,7 +64,12 @@ class PokeScaffoldState extends State<PokeScaffold> {
                 height: MediaQuery.of(context).size.height,
                 width: MediaQuery.of(context).size.width,
                 alignment: Alignment.center,
-                child: widget.dialog!,
+                child: Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  decoration: const BoxDecoration(color: Colors.transparent),
+                  child: widget.dialog!,
+                ),
               ),
             ),
         ],

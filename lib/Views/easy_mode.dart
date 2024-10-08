@@ -134,6 +134,7 @@ class _EasyModePageState extends State<EasyModePage> {
                           if (audioPlugin.playing) {
                             await audioPlugin.stop();
                           }
+                          await audioPlugin.setUrl(pokemonShout);
                           await audioPlugin.play();
                           await audioPlugin.stop();
                           _changeScaleUp();

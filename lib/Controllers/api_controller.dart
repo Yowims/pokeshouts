@@ -7,22 +7,34 @@ import 'package:pokeshouts/Views/Helpers/pokedex_helper.dart';
 
 class ApiController {
   final String _baseUrl = "https://www.pokepedia.fr/api.php";
+  int attempts = 0;
 
   Future<PokepediaImageDTO> _getPokemonImageAsync(String pkmnName) async {
-    http.Response response = await http.get(Uri.parse("$_baseUrl?action=query&prop=pageimages&titles=$pkmnName&format=json&pithumbsize=500"));
+    try {
+      http.Response response = await http.get(Uri.parse("$_baseUrl?action=query&prop=pageimages&titles=$pkmnName&format=json&pithumbsize=500"));
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final pages = data['query']['pages'];
-      final pageKey = pages.keys.first;
-      final page = pages[pageKey];
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final pages = data['query']['pages'];
+        final pageKey = pages.keys.first;
+        final page = pages[pageKey];
 
-      if (page.containsKey('thumbnail')) {
-        return PokepediaImageDTO.fromJson(page['thumbnail']);
+        if (page.containsKey('thumbnail')) {
+          return PokepediaImageDTO.fromJson(page['thumbnail']);
+        }
+      }
+
+      throw Exception("Image non trouvée, ou parsing échoué.");
+    } catch (e) {
+      attempts++;
+      if (attempts <= 3) {
+        PokepediaImageDTO dto = await _getPokemonImageAsync(pkmnName);
+        return dto;
+      } else {
+        attempts = 0;
+        throw Exception("Image non trouvée, ou parsing échoué.");
       }
     }
-
-    throw Exception("Image non trouvée, ou parsing échoué.");
   }
 
   /// Méthode pour récupérer le cri de Pokmon depuis MediaWiki
