@@ -1,7 +1,7 @@
 import 'package:pokeshouts/Models/pokemon.dart';
 
 class PickPokemonResult {
-  Map<int, Pokemon> pokemonChoices;
+  List<Pokemon> pokemonChoices;
   int goodAnswerIndex;
   String pokemonShout;
 

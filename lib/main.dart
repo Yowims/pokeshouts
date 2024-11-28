@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:pokeshouts/Providers/pokemon_loaded_provider.dart';
-import 'package:pokeshouts/Providers/round_timer_provider.dart';
+import 'package:pokeshouts/Services/round_timer/round_timer_bloc.dart';
 import 'package:pokeshouts/Views/easy_mode.dart';
 import 'package:pokeshouts/Views/main_menu.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:pokeshouts/Views/test_pokemons.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,10 +19,9 @@ class PokeShoutsApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
+    return MultiBlocProvider(
       providers: [
-        ChangeNotifierProvider(create: ((context) => PokemonLoadedProvider())),
-        ChangeNotifierProvider(create: ((context) => RoundTimerProvider())),
+        BlocProvider(create: (context) => RoundTimerBloc()),
       ],
       child: MaterialApp(
         title: 'Flutter Demo',

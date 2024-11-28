@@ -1,16 +1,17 @@
 import 'dart:math';
-import 'package:flutter/material.dart';
 import 'package:pokeshouts/Controllers/api_controller.dart';
 import 'package:pokeshouts/Models/pick_pokemon_result.dart';
 import 'package:pokeshouts/Models/pokemon.dart';
-import 'package:pokeshouts/Providers/pokemon_loaded_provider.dart';
 import 'package:pokeshouts/Views/Helpers/pokedex_helper.dart';
-import 'package:provider/provider.dart';
 
 class GameplayController {
   static final ApiController apiController = ApiController();
 
-  static Future<PickPokemonResult> pickPokemons(BuildContext context, Map<int, Pokemon> pokemonChoices, int goodAnswerIndex, String pokemonShout) async {
+  static Future<PickPokemonResult> pickPokemons() async {
+    List<Pokemon> pokemonChoices = [];
+    int goodAnswerIndex = 0;
+    String pokemonShout = "";
+
     // On définit les 4 cases du choix de Pokémon
     for (var i = 0; i < 4; i++) {
       Pokemon pkmn = Pokemon.empty();
@@ -22,7 +23,7 @@ class GameplayController {
         // Si l'un de mes éléments dans le tableau des Pokémon a le même index que celui défini aléatoirement,
         // alors on relance l'aléatoire pour récupérer un autre index et ce jusqu'à ce qu'il soit différent
         // de toutes les entrées existantes dans la liste déjà récupérée
-        while (pokemonChoices.entries.any((element) => element.value.index == randomPokemonIndex)) {
+        while (pokemonChoices.any((element) => element.index == randomPokemonIndex)) {
           randomPokemonIndex = Random().nextInt(PokedexHelper.pokedex.length) + 1;
         }
 
@@ -34,7 +35,7 @@ class GameplayController {
           continue;
         }
 
-        pokemonChoices.addAll({i: pkmn});
+        pokemonChoices.addAll({pkmn});
         break;
       }
     }
@@ -45,24 +46,19 @@ class GameplayController {
     if (1 <= goodChoice && goodChoice <= 25) // De 1 à 25 : Case 1
     {
       goodAnswerIndex = 0;
-      pokemonShout = pokemonChoices[0]!.shoutUrl;
+      pokemonShout = pokemonChoices[0].shoutUrl;
     } else if (26 <= goodChoice && goodChoice <= 50) // De 26 à 50 : Case 2
     {
       goodAnswerIndex = 1;
-      pokemonShout = pokemonChoices[1]!.shoutUrl;
+      pokemonShout = pokemonChoices[1].shoutUrl;
     } else if (51 <= goodChoice && goodChoice <= 75) // De 51 à 75 : Case 3
     {
       goodAnswerIndex = 2;
-      pokemonShout = pokemonChoices[2]!.shoutUrl;
+      pokemonShout = pokemonChoices[2].shoutUrl;
     } else // De 76 à 100 : Case 4
     {
       goodAnswerIndex = 3;
-      pokemonShout = pokemonChoices[3]!.shoutUrl;
-    }
-
-    if (context.mounted) {
-      PokemonLoadedProvider pokemonLoadedProvider = Provider.of<PokemonLoadedProvider>(context, listen: false);
-      pokemonLoadedProvider.setPokemonImagesLoaded = pokemonChoices;
+      pokemonShout = pokemonChoices[3].shoutUrl;
     }
 
     return PickPokemonResult(pokemonChoices, goodAnswerIndex, pokemonShout);
