@@ -5,7 +5,9 @@ sealed class AnswerPickedState extends Equatable {
   const AnswerPickedState(this.answerPicked);
 
   @override
-  List<Object> get props => [];
+  List<Object> get props => [
+        answerPicked,
+      ];
 }
 
 final class AnswerPickedInitial extends AnswerPickedState {

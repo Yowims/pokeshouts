@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:pokeshouts/Services/answer_picked/answer_picked_bloc.dart';
+import 'package:pokeshouts/Services/pokemon_loaded/pokemon_loaded_bloc.dart';
+import 'package:pokeshouts/Services/round_timer/round_timer_bloc.dart';
 import 'package:pokeshouts/Views/Components/playable_sound_pokeball.dart';
 import 'package:pokeshouts/Views/Components/poke_scaffold.dart';
 import 'package:pokeshouts/Views/Components/pokemon_choice_grid.dart';
@@ -34,6 +36,8 @@ class _EasyModePageState extends State<EasyModePage> {
 
   @override
   Widget build(BuildContext context) {
+    context.read<PokemonLoadedBloc>().add(OnPokemonLoadedRequestEvent());
+    context.read<RoundTimerBloc>().add(const StartTimerEvent(60));
     PokeScaffold easyScaffold = PokeScaffold(
       key: easyScaffoldKey,
       appBar: AppBar(
