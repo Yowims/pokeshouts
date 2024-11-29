@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:pokeshouts/Models/Pokepedia/pokepedia_image_dto.dart';
-import 'package:pokeshouts/Models/Pokepedia/pokepedia_shout_file.dart';
 import 'package:pokeshouts/Models/pokemon.dart';
 import 'package:pokeshouts/Views/Helpers/pokedex_helper.dart';
 
@@ -40,22 +39,23 @@ class ApiController {
   /// Méthode pour récupérer le cri de Pokmon depuis MediaWiki
   /// => Méthode pas fiable, les fichiers OGG sont pas toujours présents dans les retours MediaWiki,
   /// en attente d'une refonte
-  Future<String> _getPokemonShoutUrlAsync(String pkmnName) async {
-    http.Response response = await http.get(Uri.parse("$_baseUrl?action=query&prop=images&titles=$pkmnName&format=json"));
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final pages = data['query']['pages'];
-      final pageKey = pages.keys.first;
-      final page = pages[pageKey];
+  ///
+  // Future<String> _getPokemonShoutUrlAsync(String pkmnName) async {
+  //   http.Response response = await http.get(Uri.parse("$_baseUrl?action=query&prop=images&titles=$pkmnName&format=json"));
+  //   if (response.statusCode == 200) {
+  //     final data = jsonDecode(response.body);
+  //     final pages = data['query']['pages'];
+  //     final pageKey = pages.keys.first;
+  //     final page = pages[pageKey];
 
-      List<PokepediaShoutFile> elements = _MapHelper.getMapByIndex(page, "images").map((e) => PokepediaShoutFile(e["ns"], e["title"])).toList();
+  //     List<PokepediaShoutFile> elements = _MapHelper.getMapByIndex(page, "images").map((e) => PokepediaShoutFile(e["ns"], e["title"])).toList();
 
-      String shoutFilename = elements.firstWhere((element) => element.title.contains("Cri")).title.replaceAll(" ", "_");
+  //     String shoutFilename = elements.firstWhere((element) => element.title.contains("Cri")).title.replaceAll(" ", "_");
 
-      return "https://www.pokepedia.fr/Spécial:FilePath/$shoutFilename";
-    }
-    throw Exception("Cri non trouvé, ou parsing échoué.");
-  }
+  //     return "https://www.pokepedia.fr/Spécial:FilePath/$shoutFilename";
+  //   }
+  //   throw Exception("Cri non trouvé, ou parsing échoué.");
+  // }
 
   Future<String> _getPokemonShoutUrlFromPokedexHelperAsync(int pkmnIndex, String game) async {
     String pkmnIdStr = "";
@@ -103,17 +103,17 @@ class ApiController {
   }
 }
 
-class _MapHelper {
-  static List getMapByIndex(Map map, String index) {
-    List result = [];
-    for (var item in map.entries) {
-      if (item.key == index) {
-        result = item.value;
-      }
-      if (item.value is Map) {
-        getMapByIndex(item.value, index);
-      }
-    }
-    return result;
-  }
-}
+// class _MapHelper {
+//   static List getMapByIndex(Map map, String index) {
+//     List result = [];
+//     for (var item in map.entries) {
+//       if (item.key == index) {
+//         result = item.value;
+//       }
+//       if (item.value is Map) {
+//         getMapByIndex(item.value, index);
+//       }
+//     }
+//     return result;
+//   }
+// }

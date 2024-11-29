@@ -4,6 +4,7 @@ import 'package:pokeshouts/Services/answer_picked/answer_picked_bloc.dart';
 import 'package:pokeshouts/Services/change_scale/change_scale_bloc.dart';
 import 'package:pokeshouts/Services/pokemon_loaded/pokemon_loaded_bloc.dart';
 import 'package:pokeshouts/Services/round_timer/round_timer_bloc.dart';
+import 'package:pokeshouts/Services/shout_manager/shout_manager_bloc.dart';
 import 'package:pokeshouts/Views/easy_mode.dart';
 import 'package:pokeshouts/Views/main_menu.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -24,7 +25,8 @@ class PokeShoutsApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (context) => PokemonLoadedBloc()),
+        BlocProvider(create: (context) => ShoutManagerBloc()),
+        BlocProvider(create: (context) => PokemonLoadedBloc(context.read<ShoutManagerBloc>())),
         BlocProvider(create: (context) => AnswerPickedBloc(context.read<PokemonLoadedBloc>())),
         BlocProvider(create: (context) => ChangeScaleBloc()),
         BlocProvider(create: (context) => RoundTimerBloc()),

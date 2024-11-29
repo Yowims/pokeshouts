@@ -64,37 +64,40 @@ class _EasyModePageState extends State<EasyModePage> {
       ),
       body: isLoading
           ? const WaitingIndicator()
-          : Stack(
-              children: [
-                Positioned(
-                  top: 5,
-                  right: 5,
-                  child: TimerIndicator(
-                    onTimerFinished: () {
-                      easyScaffoldKey.currentState!.showDialog();
-                    },
+          : BlocListener<RoundTimerBloc, RoundTimerState>(
+              listener: (context, state) {
+                if (state is TimerComplete) {
+                  easyScaffoldKey.currentState!.showDialog();
+                }
+              },
+              child: Stack(
+                children: [
+                  const Positioned(
+                    top: 5,
+                    right: 5,
+                    child: TimerIndicator(),
                   ),
-                ),
-                Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      BlocBuilder<AnswerPickedBloc, AnswerPickedState>(
-                        builder: (context, state) {
-                          return Text("Score: ${state.answerPicked.score} pts");
-                        },
-                      ),
-                      PlayableSoundPokeball(
-                        audioPlayer: audioPlugin,
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      const PokemonChoiceGrid(),
-                    ],
+                  Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        BlocBuilder<AnswerPickedBloc, AnswerPickedState>(
+                          builder: (context, state) {
+                            return Text("Score: ${state.answerPicked.score} pts");
+                          },
+                        ),
+                        PlayableSoundPokeball(
+                          audioPlayer: audioPlugin,
+                        ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        const PokemonChoiceGrid(),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
     );
 

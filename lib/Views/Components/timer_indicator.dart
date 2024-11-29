@@ -4,9 +4,8 @@ import 'package:pokeshouts/Services/round_timer/round_timer_bloc.dart';
 
 class TimerIndicator extends StatelessWidget {
   final int initialSeconds;
-  final Function() onTimerFinished;
 
-  const TimerIndicator({super.key, required this.onTimerFinished, this.initialSeconds = 60});
+  const TimerIndicator({super.key, this.initialSeconds = 60});
 
   @override
   Widget build(BuildContext context) {

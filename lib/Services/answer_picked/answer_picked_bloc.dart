@@ -10,7 +10,6 @@ class AnswerPickedBloc extends Bloc<AnswerPickedEvent, AnswerPickedState> {
   final PokemonLoadedBloc pokemonLoadedBloc;
   AnswerPickedBloc(this.pokemonLoadedBloc) : super(const AnswerPickedInitial(PickAnswerModel(null, 0))) {
     on<OnRightAnswerPickedEvent>((event, emit) {
-      print("TRUE !!!");
       emit(AnswerPickedInitial(PickAnswerModel(true, event.score + 50)));
       pokemonLoadedBloc.add(OnPokemonLoadedRequestEvent());
       Future.delayed(const Duration(milliseconds: 200), () {
@@ -18,14 +17,12 @@ class AnswerPickedBloc extends Bloc<AnswerPickedEvent, AnswerPickedState> {
       });
     });
     on<OnWrongAnswerPickedEvent>((event, emit) {
-      print("FALSE !!!");
       emit(AnswerPickedInitial(PickAnswerModel(false, event.score)));
       Future.delayed(const Duration(milliseconds: 200), () {
         add(OnResetAnswerPickedEvent(event.score));
       });
     });
     on<OnResetAnswerPickedEvent>((event, emit) {
-      print("Reset.");
       emit(AnswerPickedInitial(PickAnswerModel(null, event.score)));
     });
   }

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:pokeshouts/Services/change_scale/change_scale_bloc.dart';
 import 'package:pokeshouts/Services/pokemon_loaded/pokemon_loaded_bloc.dart';
+import 'package:pokeshouts/Services/shout_manager/shout_manager_bloc.dart';
 
 class PlayableSoundPokeball extends StatelessWidget {
   final AudioPlayer audioPlayer;
@@ -24,13 +25,7 @@ class PlayableSoundPokeball extends StatelessWidget {
         return GestureDetector(
           onTap: () async {
             _changeScaleDown(context);
-            if (audioPlayer.playing) {
-              await audioPlayer.stop();
-            }
-            await audioPlayer.setUrl(state.result.pokemonShout);
-            await audioPlayer.play();
-            await audioPlayer.stop();
-
+            context.read<ShoutManagerBloc>().add(OnPlayShoutEvent(state.result.pokemonShout));
             if (context.mounted) {
               _changeScaleUp(context);
             }
