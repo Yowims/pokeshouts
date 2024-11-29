@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:pokeshouts/Services/answer_picked/answer_picked_bloc.dart';
 import 'package:pokeshouts/Services/pokemon_loaded/pokemon_loaded_bloc.dart';
 import 'package:pokeshouts/Services/round_timer/round_timer_bloc.dart';
@@ -9,30 +8,13 @@ import 'package:pokeshouts/Views/Components/playable_sound_pokeball.dart';
 import 'package:pokeshouts/Views/Components/poke_scaffold.dart';
 import 'package:pokeshouts/Views/Components/pokemon_choice_grid.dart';
 import 'package:pokeshouts/Views/Components/timer_indicator.dart';
-import 'package:pokeshouts/Views/Components/waiting_indicator.dart';
 import 'package:pokeshouts/Views/Helpers/design_helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class EasyModePage extends StatefulWidget {
-  const EasyModePage({Key? key}) : super(key: key);
+class EasyModePage extends StatelessWidget {
+  EasyModePage({Key? key}) : super(key: key);
 
-  @override
-  State<EasyModePage> createState() => _EasyModePageState();
-}
-
-class _EasyModePageState extends State<EasyModePage> {
-  GlobalKey<PokeScaffoldState> easyScaffoldKey = GlobalKey();
-
-  bool roundFinished = false;
-
-  AudioPlayer audioPlugin = AudioPlayer();
-
-  bool isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-  }
+  final GlobalKey<PokeScaffoldState> easyScaffoldKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -62,43 +44,39 @@ class _EasyModePageState extends State<EasyModePage> {
           )
         ],
       ),
-      body: isLoading
-          ? const WaitingIndicator()
-          : BlocListener<RoundTimerBloc, RoundTimerState>(
-              listener: (context, state) {
-                if (state is TimerComplete) {
-                  easyScaffoldKey.currentState!.showDialog();
-                }
-              },
-              child: Stack(
+      body: BlocListener<RoundTimerBloc, RoundTimerState>(
+        listener: (context, state) {
+          if (state is TimerComplete) {
+            easyScaffoldKey.currentState!.showDialog();
+          }
+        },
+        child: Stack(
+          children: [
+            const Positioned(
+              top: 5,
+              right: 5,
+              child: TimerIndicator(),
+            ),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Positioned(
-                    top: 5,
-                    right: 5,
-                    child: TimerIndicator(),
+                  BlocBuilder<AnswerPickedBloc, AnswerPickedState>(
+                    builder: (context, state) {
+                      return Text("Score: ${state.answerPicked.score} pts");
+                    },
                   ),
-                  Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        BlocBuilder<AnswerPickedBloc, AnswerPickedState>(
-                          builder: (context, state) {
-                            return Text("Score: ${state.answerPicked.score} pts");
-                          },
-                        ),
-                        PlayableSoundPokeball(
-                          audioPlayer: audioPlugin,
-                        ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        const PokemonChoiceGrid(),
-                      ],
-                    ),
+                  const PlayableSoundPokeball(),
+                  const SizedBox(
+                    height: 20,
                   ),
+                  const PokemonChoiceGrid(),
                 ],
               ),
             ),
+          ],
+        ),
+      ),
     );
 
     return PopScope(

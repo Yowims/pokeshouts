@@ -39,7 +39,7 @@ class PokeShoutsApp extends StatelessWidget {
         initialRoute: '/',
         routes: {
           '/': (context) => const MainMenuPage(),
-          '/easy': (context) => const EasyModePage(),
+          '/easy': (context) => EasyModePage(),
           '/test': (context) => const TestPokemonPage(),
         },
       ),

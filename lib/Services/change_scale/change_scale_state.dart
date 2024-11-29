@@ -5,7 +5,9 @@ sealed class ChangeScaleState extends Equatable {
   const ChangeScaleState(this.scale);
 
   @override
-  List<Object> get props => [];
+  List<Object> get props => [
+        scale,
+      ];
 }
 
 final class ChangeScaleStateInitial extends ChangeScaleState {

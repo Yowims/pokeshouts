@@ -6,7 +6,7 @@ part 'change_scale_state.dart';
 
 class ChangeScaleBloc extends Bloc<ChangeScaleEvent, ChangeScaleState> {
   ChangeScaleBloc() : super(const ChangeScaleStateInitial(1)) {
-    on<ChangeScaleTriggerEvent>((event, emit) => const ChangeScaleStateInitial(0.95));
-    on<ChangeScaleDefaultEvent>((event, emit) => const ChangeScaleStateInitial(1));
+    on<ChangeScaleTriggerEvent>((event, emit) => emit(const ChangeScaleStateInitial(0.95)));
+    on<ChangeScaleDefaultEvent>((event, emit) => emit(const ChangeScaleStateInitial(1)));
   }
 }
