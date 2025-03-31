@@ -1,15 +1,14 @@
 part of 'answer_picked_bloc.dart';
 
 sealed class AnswerPickedState extends Equatable {
-  final PickAnswerModel answerPicked;
-  const AnswerPickedState(this.answerPicked);
+  const AnswerPickedState();
 
   @override
-  List<Object> get props => [
-        answerPicked,
-      ];
+  List<Object?> get props => [];
 }
 
-final class AnswerPickedInitial extends AnswerPickedState {
-  const AnswerPickedInitial(super.answerPicked);
-}
+final class AnswerPickedInitial extends AnswerPickedState {}
+
+final class AnswerGoodPickState extends AnswerPickedState {}
+
+final class AnswerBadPickState extends AnswerPickedState {}

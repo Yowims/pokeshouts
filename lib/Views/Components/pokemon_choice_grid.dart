@@ -1,7 +1,5 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:pokeshouts/Services/answer_picked/answer_picked_bloc.dart';
 import 'package:pokeshouts/Services/pokemon_loaded/pokemon_loaded_bloc.dart';
 import 'package:pokeshouts/Views/Components/waiting_indicator.dart';
@@ -17,10 +15,10 @@ class PokemonChoiceGrid extends StatelessWidget {
           children: [
             const PokemonChoices(),
             PokemonGoodChoiceWidget(
-              isVisible: state.answerPicked.isRight == true,
+              isVisible: state is AnswerGoodPickState,
             ),
             PokemonBadChoiceWidget(
-              isVisible: state.answerPicked.isRight == false,
+              isVisible: state is AnswerBadPickState,
             ),
           ],
         );
@@ -33,13 +31,13 @@ class PokemonChoices extends StatelessWidget {
   const PokemonChoices({super.key});
 
   void onChoiceMade(BuildContext context, int goodAnswerIndex, int selectedIndex) {
-    int actualScore = context.read<AnswerPickedBloc>().state.answerPicked.score;
+    int actualScore = context.read<AnswerPickedBloc>().score;
     if (goodAnswerIndex == selectedIndex) {
       // Si le joueur tape sur la bonne case, on met un écran vert devant les choix et on passe au suivant
-      context.read<AnswerPickedBloc>().add(OnRightAnswerPickedEvent(actualScore));
+      context.read<AnswerPickedBloc>().add(OnRightAnswerPickedEvent(score: actualScore));
     } else {
       // Sinon on met un écran rouge devant les choix
-      context.read<AnswerPickedBloc>().add(OnWrongAnswerPickedEvent(actualScore));
+      context.read<AnswerPickedBloc>().add(OnWrongAnswerPickedEvent(score: actualScore));
     }
   }
 
@@ -65,10 +63,9 @@ class PokemonChoices extends StatelessWidget {
                   child: SizedBox(
                     height: MediaQuery.of(context).size.height * 0.2,
                     width: MediaQuery.of(context).size.height * 0.2,
-                    child: CachedNetworkImage(
-                      cacheManager: DefaultCacheManager(),
-                      imageUrl: state.result.pokemonChoices[index].imageUrl,
-                      fadeOutDuration: const Duration(milliseconds: 100),
+                    child: FadeInImage(
+                      image: AssetImage(state.result.pokemonChoices[index].imageUrl),
+                      placeholder: const AssetImage('assets/images/waiting.gif'),
                     ),
                   ),
                 ),

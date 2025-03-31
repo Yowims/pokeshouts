@@ -53,25 +53,29 @@ class _TestPokemonPageState extends State<TestPokemonPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(50),
-        child: TextField(
-            controller: _searchController,
-            decoration: const InputDecoration(
-              filled: true,
-              fillColor: Colors.white,
-            ),
-            keyboardType: TextInputType.number,
-            onChanged: (value) {
-              if (value == "" || int.parse(value) > PokedexHelper.pokedex.length) {
-                value = "1";
-              }
-              setState(() {
-                index = int.parse(value);
-                loadPokemonInfos();
-              });
-            }),
-      )),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(50),
+          child: TextField(
+              controller: _searchController,
+              decoration: const InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
+                hintText: 'Pkmn ID (ex : 350)',
+                suffixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(borderSide: BorderSide()),
+              ),
+              keyboardType: TextInputType.number,
+              onChanged: (value) {
+                if (value == "" || int.parse(value) > PokedexHelper.pokedex.length) {
+                  value = "1";
+                }
+                setState(() {
+                  index = int.parse(value);
+                  loadPokemonInfos();
+                });
+              }),
+        ),
+      ),
       body: isLoading
           ? const WaitingIndicator()
           : Center(
@@ -94,9 +98,9 @@ class _TestPokemonPageState extends State<TestPokemonPage> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         pokemon.imageUrl != ""
-            ? FadeInImage.assetNetwork(
-                placeholder: "assets/images/waiting.gif",
-                image: pokemon.imageUrl,
+            ? FadeInImage(
+                image: AssetImage(pokemon.imageUrl),
+                placeholder: const AssetImage('assets/images/waiting.gif'),
                 height: 300,
               )
             : Center(child: Text(AppLocalizations.of(context)!.not_implemented_pokemon)),
@@ -109,57 +113,73 @@ class _TestPokemonPageState extends State<TestPokemonPage> {
           ],
         ),
         const Divider(),
-        pokemon.shoutUrl != ""
-            ? TextButton(
-                child: const Icon(Icons.play_arrow),
-                onPressed: () async {
+        ElevatedButton(
+          onPressed: pokemon.shoutUrl != ''
+              ? () async {
                   if (!audioPlugin.playing) {
                     await audioPlugin.setUrl(pokemon.shoutUrl);
                     await audioPlugin.play();
                     await audioPlugin.stop();
                   }
-                },
+                }
+              : null,
+          child: const Icon(Icons.play_arrow),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Expanded(
+                flex: 4,
+                child: ElevatedButton(
+                  style: ButtonStyle(
+                    backgroundColor: const MaterialStatePropertyAll(Colors.blueGrey),
+                    shadowColor: MaterialStatePropertyAll(Colors.blueGrey[900]),
+                    elevation: const MaterialStatePropertyAll(5),
+                  ),
+                  onPressed: index <= 1
+                      ? null
+                      : () {
+                          setState(() {
+                            int newIndex = index - 1;
+                            if (newIndex < 0) {
+                              index = 1;
+                            } else {
+                              index = newIndex;
+                            }
+                            loadPokemonInfos();
+                            _searchController.text = "";
+                          });
+                        },
+                  child: const Icon(Icons.arrow_left, size: 48),
+                ),
+              ),
+              const Expanded(child: SizedBox()),
+              Expanded(
+                flex: 4,
+                child: ElevatedButton(
+                  style: const ButtonStyle(backgroundColor: MaterialStatePropertyAll(Colors.blueGrey)),
+                  onPressed: index >= PokedexHelper.pokedex.length
+                      ? null
+                      : () {
+                          setState(() {
+                            int newIndex = index + 1;
+                            if (newIndex > PokedexHelper.pokedex.length) {
+                              index = PokedexHelper.pokedex.length - 1;
+                            } else {
+                              index = newIndex;
+                            }
+                            loadPokemonInfos();
+                            _searchController.text = "";
+                          });
+                        },
+                  child: const Icon(Icons.arrow_right, size: 48),
+                ),
               )
-            : const TextButton(onPressed: null, child: Icon(Icons.play_arrow)),
-        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          TextButton(
-            onPressed: index <= 1
-                ? null
-                : () {
-                    setState(() {
-                      int newIndex = index - 1;
-                      if (newIndex < 0) {
-                        index = 1;
-                      } else {
-                        index = newIndex;
-                      }
-                      loadPokemonInfos();
-                      _searchController.text = "";
-                    });
-                  },
-            child: const Icon(Icons.arrow_left, size: 48),
+            ],
           ),
-          TextButton(
-            onPressed: index >= PokedexHelper.pokedex.length
-                ? null
-                : () {
-                    setState(() {
-                      int newIndex = index + 1;
-                      if (newIndex > PokedexHelper.pokedex.length) {
-                        index = PokedexHelper.pokedex.length - 1;
-                      } else {
-                        index = newIndex;
-                      }
-                      loadPokemonInfos();
-                      _searchController.text = "";
-                    });
-                  },
-            child: const Icon(
-              Icons.arrow_right,
-              size: 48,
-            ),
-          )
-        ]),
+        ),
       ],
     );
   }

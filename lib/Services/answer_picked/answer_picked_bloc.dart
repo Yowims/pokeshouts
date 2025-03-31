@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:pokeshouts/Models/pick_answer_model.dart';
 import 'package:pokeshouts/Services/pokemon_loaded/pokemon_loaded_bloc.dart';
 
 part 'answer_picked_event.dart';
@@ -8,22 +7,27 @@ part 'answer_picked_state.dart';
 
 class AnswerPickedBloc extends Bloc<AnswerPickedEvent, AnswerPickedState> {
   final PokemonLoadedBloc pokemonLoadedBloc;
-  AnswerPickedBloc(this.pokemonLoadedBloc) : super(const AnswerPickedInitial(PickAnswerModel(null, 0))) {
+  AnswerPickedBloc(this.pokemonLoadedBloc) : super(AnswerPickedInitial()) {
     on<OnRightAnswerPickedEvent>((event, emit) {
-      emit(AnswerPickedInitial(PickAnswerModel(true, event.score + 50)));
+      score = event.score + 50;
+      emit(AnswerGoodPickState());
       pokemonLoadedBloc.add(OnPokemonLoadedRequestEvent());
       Future.delayed(const Duration(milliseconds: 200), () {
-        add(OnResetAnswerPickedEvent(event.score + 50));
+        add(const OnResetAnswerPickedEvent());
       });
     });
     on<OnWrongAnswerPickedEvent>((event, emit) {
-      emit(AnswerPickedInitial(PickAnswerModel(false, event.score)));
-      Future.delayed(const Duration(milliseconds: 200), () {
-        add(OnResetAnswerPickedEvent(event.score));
-      });
+      emit(AnswerBadPickState());
+      Future.delayed(const Duration(milliseconds: 200), () => add(const OnResetAnswerPickedEvent()));
     });
-    on<OnResetAnswerPickedEvent>((event, emit) {
-      emit(AnswerPickedInitial(PickAnswerModel(null, event.score)));
+    on<OnLeaveQuizEvent>((event, emit) {
+      score = 0;
+      emit(AnswerPickedInitial());
     });
+    on<OnResetAnswerPickedEvent>(((event, emit) {
+      emit(AnswerPickedInitial());
+    }));
   }
+
+  int score = 0;
 }

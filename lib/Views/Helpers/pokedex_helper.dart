@@ -436,7 +436,7 @@ class PokedexHelper {
     423: {"name": "Tritosor", "game": "XY"},
     424: {"name": "Capidextre", "game": "XY"},
     425: {"name": "Baudrive", "game": "XY"},
-    426: {"name": "Grodrive", "game": "DP"},
+    426: {"name": "Grodrive", "game": "XY"},
     427: {"name": "Laporeille", "game": "XY"},
     428: {"name": "Lockpin", "game": "XY"},
     429: {"name": "Magirêve", "game": "XY"},

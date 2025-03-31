@@ -31,13 +31,14 @@ class EasyModePage extends StatelessWidget {
         content: Center(
           child: BlocBuilder<AnswerPickedBloc, AnswerPickedState>(
             builder: (context, state) {
-              return Text("Le temps imparti pour cette manche est écoulé.\nVous avez marqué ${state.answerPicked.score} points.\nFélicitations !");
+              return Text("Le temps imparti pour cette manche est écoulé.\nVous avez marqué ${context.read<AnswerPickedBloc>().score} points.\nFélicitations !");
             },
           ),
         ),
         actions: [
           TextButton(
             onPressed: () {
+              context.read<AnswerPickedBloc>().add(const OnLeaveQuizEvent());
               Navigator.of(context).popUntil(ModalRoute.withName("/"));
             },
             child: const Text("OK"),
@@ -63,7 +64,7 @@ class EasyModePage extends StatelessWidget {
                 children: [
                   BlocBuilder<AnswerPickedBloc, AnswerPickedState>(
                     builder: (context, state) {
-                      return Text("Score: ${state.answerPicked.score} pts");
+                      return Text("Score: ${context.read<AnswerPickedBloc>().score} pts");
                     },
                   ),
                   const PlayableSoundPokeball(),
@@ -95,6 +96,7 @@ class EasyModePage extends StatelessWidget {
               actions: [
                 TextButton(
                   onPressed: () {
+                    context.read<AnswerPickedBloc>().add(const OnLeaveQuizEvent());
                     Navigator.of(context).popUntil(ModalRoute.withName("/"));
                   },
                   child: const Text("OK"),

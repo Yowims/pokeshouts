@@ -81,10 +81,10 @@ class ApiController {
   Future<Pokemon> getPokemonInfosAsync(int pkmnIndex) async {
     PokedexValue pkmn = PokedexValue.fromJson(PokedexHelper.pokedex.entries.firstWhere((element) => element.key == pkmnIndex).value);
 
-    PokepediaImageDTO imageDTO = await _getPokemonImageAsync(pkmn.name);
+    //PokepediaImageDTO imageDTO = await _getPokemonImageAsync(pkmn.name);
     String pokemonShoutUrl = await _getPokemonShoutUrlFromPokedexHelperAsync(pkmnIndex, pkmn.game);
 
-    Pokemon pokemon = Pokemon(pkmnIndex, pkmn.name, imageDTO.source, pokemonShoutUrl);
+    Pokemon pokemon = Pokemon(pkmnIndex, pkmn.name, 'assets/pokemons/${pkmn.name}.png', pokemonShoutUrl);
     return pokemon;
   }
 

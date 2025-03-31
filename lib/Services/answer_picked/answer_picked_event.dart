@@ -1,23 +1,32 @@
 part of 'answer_picked_bloc.dart';
 
 sealed class AnswerPickedEvent extends Equatable {
-  final int score;
-  const AnswerPickedEvent(this.score);
+  const AnswerPickedEvent();
 
   @override
-  List<Object> get props => [
-        score,
-      ];
+  List<Object> get props => [];
 }
 
 class OnRightAnswerPickedEvent extends AnswerPickedEvent {
-  const OnRightAnswerPickedEvent(super.score);
+  final int score;
+  const OnRightAnswerPickedEvent({required this.score});
+
+  @override
+  List<Object> get props => [score];
 }
 
 class OnWrongAnswerPickedEvent extends AnswerPickedEvent {
-  const OnWrongAnswerPickedEvent(super.score);
+  final int score;
+  const OnWrongAnswerPickedEvent({required this.score});
+
+  @override
+  List<Object> get props => [score];
+}
+
+class OnLeaveQuizEvent extends AnswerPickedEvent {
+  const OnLeaveQuizEvent();
 }
 
 class OnResetAnswerPickedEvent extends AnswerPickedEvent {
-  const OnResetAnswerPickedEvent(super.score);
+  const OnResetAnswerPickedEvent();
 }
